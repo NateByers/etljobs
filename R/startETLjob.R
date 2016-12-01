@@ -1,39 +1,25 @@
-#' Start an etl job by creating a directory with supporting documents
-#'
-#' @param location Location where the new directory will be
-#' @param name The name of the new directory
-#' @details This function will create a new directory with the following CSV files
-#' in it: sources, relationships, transformations, load, and codes.
-#' @examples
-#' createETLjob(name = "my_new_job")
-#' @export
-startETLjob <- function(location = ".", name){
-  location <- paste(location, name, sep = "/")
-  if(dir.exists(location)){
-    stop("job already exists")
+startETLjob <- function(job_location,
+                        expected_files = c("source.csv", "join.csv",
+                                           "transform.csv", "code.csv",
+                                           "filter.csv", "summarize.csv",
+                                           "reshape.csv", "load.csv", "job.yaml")){
+  # job_location <- "test_job2"
+  job_location <- sub("\\/$", "", job_location)
+
+  if(!dir.exists(job_location)){
+    stop("job directory does not exist")
   }
-  dir.create(location)
 
-  writeLines(c("name", "location", "type", "field", "field_type"),
-    con = paste0(location, "/sources.csv"), sep = ",")
+  files <- list.files(job_location)
+  if(sum(!expected_files %in% files) > 0){
+    stop(paste("some files are missing from the etl job directory:",
+               expected_files[!expected_files %in% files]))
+  }
 
-  writeLines(c("source1_name", "source1_field", "source2_name", "source2_field"),
-    con = paste0(location, "/relationships.csv"), sep = ",")
+  etljob <- list()
 
-  writeLines(c("new_field", "transformation", "field_type"),
-    con = paste0(location, "/transformations.csv"),sep = ",")
+  attr(etljob, "class") <- "etljob"
+  attr(etljob, "job_location") <- job_location
 
-  writeLines(c("location", "type", "table", "append"),
-    con = paste0(location, "/load.csv"), sep = ",")
-
-  writeLines(c("new_field", "code", "value", "field_type"),
-             con = paste0(location, "/codes.csv"), sep = ",")
-
-  writeLines(c("new_field", "group_by", "summarize", "field_type"),
-             con = paste0(location, "/summarize.csv"), sep = ",")
-
-  writeLines(c("type", "key", "value"),
-             con = paste0(location, "/reshape.csv"), sep = ",")
-
-
+  return(etljob)
 }
