@@ -35,12 +35,3 @@ joinETLjob <- function(etljob){
   return(etljob)
 
 }
-
-
-
-determineJoinFunction <- function(type){
-  my_function <- eval(parse(text = "rnorm"))
-
-}
-
-

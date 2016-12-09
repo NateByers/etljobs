@@ -1,0 +1,9 @@
+Specimen_Type,Collection_Container,Collection_Group
+blood,blue,blood
+blood,red,dna
+dna,blue,dna
+dna,red,dna
+serum,red,serum
+serum,blue,serum
+saliva,red,dna
+saliva,blue,dna

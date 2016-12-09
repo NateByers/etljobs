@@ -1,0 +1,2 @@
+source,group_by,filter
+case,,case == 'V01'

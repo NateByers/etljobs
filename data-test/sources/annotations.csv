@@ -1,0 +1,11 @@
+subject_id,case,barcode,type,name,value
+A,V01,1,blood,Collection Container,blue
+A,V01,2,dna,Collection Container,blue
+A,V02,5,blood,Collection Container,blue
+B,BL,6,serum,Collection Container,blue
+C,V01,7,saliva,Collection Container,blue
+A,V01,1,blood,Storage Container,red
+A,V01,2,dna,Storage Container,red
+A,V02,5,blood,Storage Container,red
+B,BL,6,serum,Storage Container,red
+C,V01,7,saliva,Storage Container,red
