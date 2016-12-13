@@ -1,2 +1,3 @@
 source,group_by,filter
-case,,case == 'V01'
+case,,"case %in% c('V01', 'BL')"
+specimen,,type != 'stool'

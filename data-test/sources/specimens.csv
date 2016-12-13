@@ -1,6 +1,7 @@
-subject_id,case,parent,barcode,type,status,amount,unit
+patient_id,case,parent,barcode,type,status,amount,unit
 A,V01,NA,1,blood,empty,2,mL
 A,V01,1,2,dna,full,50,ug
 A,V02,,5,blood,full,2000,uL
 B,BL,,6,serum,full,0.101,oz
 C,V01,,7,saliva,full,500,uL
+C,BL,,8,stool,full,5,mL
