@@ -5,7 +5,7 @@ Race,,subject.race
 Visit,,case.case
 Visit_Date,,"as.Date(case.procedure_date, format = '%m/%d/%Y')"
 Specimen_Type,,specimen.type
-Collection_Group,,annotation.Collection_Group
+Collection_Group,,map_collection_group.Collection_Group
 Quantity,,"ifelse(specimen.unit == 'uL', specimen.amount / 1000, specimen.amount)"
 Quantity,,"ifelse(specimen.unit == 'oz', Quantity * 29.57, Quantity)"
 Quantity_Unit,,specimen.unit

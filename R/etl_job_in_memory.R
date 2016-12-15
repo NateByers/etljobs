@@ -67,11 +67,39 @@ etl_job_in_memory$methods(
 )
 
 etl_job_in_memory$methods(
+  reshape_sources = function() {
+    # .self <- j
+    reshape_table <- .self$reshape %>%
+      filter(!is.na(source))
+
+    for(i in 1:dim(reshape_table)[1]) {
+      # i = 2
+      source_name <- reshape_table[i, "source"]
+      reshape_type <- reshape_table[i, "type"]
+      key <- reshape_table[i, "key"]
+      value <- reshape_table[i, "value"]
+      if(grepl("gather", reshape_type)) {
+        fields <- reshape_table[i, "fields"]
+        fields <- strsplit(fields, "|", fixed = TRUE)[[1]]
+        .self$source_tables[[source_name]] <- .self$source_tables[[source_name]] %>%
+          gather_(key_col = key, value_col = value, gather_cols = fields)
+      } else if(grepl("spread", reshape_type)) {
+        .self$source_tables[[source_name]] <- .self$source_tables[[source_name]] %>%
+          spread_(key_col = key, value_col = value)
+        names(.self$source_tables[[source_name]]) <- stringr::str_trim(names(.self$source_tables[[source_name]]), "both")
+        names(.self$source_tables[[source_name]]) <- gsub("\\s", "_", names(.self$source_tables[[source_name]]))
+      } else {
+        stop(paste(reshape_type, "not a valid reshaping function"))
+      }
+    }
+  }
+)
+
+etl_job_in_memory$methods(
   join_tables = function() {
 
     # .self <- j
-    joins_table <- .self$join %>%
-      mutate(source_combo = paste(source1_name, source2_name))
+    joins_table <- etljobs:::process_join_table(.self$join)
 
     join_sets <- joins_table %>%
       select(source_combo, source1_name, source2_name, type) %>%
@@ -99,19 +127,21 @@ etl_job_in_memory$methods(
     #   names(j$source_tables[[k]]) <- paste(k, names(j$source_tables[[k]]), sep = ".")
     # }
 
-    join <- left_join(join_sets[1, ], joins_table, c("source_combo"))
+    join <- left_join(join_sets[1, ], joins_table,
+                      c("source_combo", "source1_name", "source2_name", "type"))
 
-    join_by <- paste(join[1, "source1_name"], joins_table[["source1_field"]],
-                         sep = ".")
-    right_fields <- paste(join[1, "source2_name"], joins_table[["source2_field"]],
-                     sep = ".")
-    names(join_by) <- right_fields
+    join_by <- join[, "source2_field"]
 
-    join_function <- eval(parse(text = paste0(join[1, "type"], "_join")))
+    names(join_by) <- join[, "source1_field"]
 
-    combined_table <- join_function(.self$source_tables[[join$source1_name]],
-                                    .self$source_tables[[join$source2_name]],
-                                    join_by)
+    join_function <- eval(parse(text = paste0(unique(join[, "type"]), "_join")))
+
+    .self$merged_table <- join_function(.self$source_tables[[unique(join$source1_name)]],
+                                        .self$source_tables[[unique(join$source2_name)]],
+                                        join_by)
+
+    .self$source_tables[[unique(join$source1_name)]] <- NULL
+    .self$source_tables[[unique(join$source2_name)]] <- NULL
 
     # combined_table <- join_function(j$source_tables[[join$source1_name]],
     #                                 j$source_tables[[join$source2_name]],
@@ -119,23 +149,37 @@ etl_job_in_memory$methods(
 
     if(dim(join_sets)[1] > 1){
       for(i in 2:dim(join_sets)[1]) {
-        # i = 1
-        join <- left_join(join_sets[i, ], joins_table, c("source1_name", "source2_name"))
+        # i = 2
+        join <- left_join(join_sets[i, ], joins_table,
+                          c("source_combo", "source1_name", "source2_name", "type"))
 
-        join_by <- paste(join[i, "source1_name"], joins_table[["source1_field"]],
-                         sep = ".")
-        right_fields <- paste(join[i, "source2_name"], joins_table[["source2_field"]],
-                              sep = ".")
-        names(join_by) <- right_fields
+        join_by <- join[, "source2_field"]
 
-        join_function <- eval(parse(text = paste0(joins[i, "type"], "_join")))
+        names(join_by) <- join[, "source1_field"]
 
-        combined_table <- join_function(combined_table,
-                                        .self$source_tables[[join$source2_name]],
-                                        join_by)
+        join_function <- eval(parse(text = paste0(unique(join[, "type"]), "_join")))
+
+        .self$merged_table <- join_function(.self$merged_table,
+                                            .self$source_tables[[unique(join$source2_name)]],
+                                            join_by)
+        .self$source_tables[[unique(join$source2_name)]] <- NULL
       }
     }
+  }
+)
 
-    .self$merged_table <- combined_table
+etl_job_in_memory$methods(
+  transform_table = function() {
+    # .self <- j
+    for(i in 1:dim(.self$transform)[1]){
+      # i = 1
+      .self$merged_table <- .self$merged_table %>%
+        mutate_(.dots = paste(.self$transform[i, "new_field"],
+                      .self$transform[i, "transformation"], sep = " = "))
+
+      x <- .self$merged_table
+      x <- x %>%
+        mutate_("subject = subject.subject_id")
+    }
   }
 )
