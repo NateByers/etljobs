@@ -8,5 +8,5 @@ Specimen_Type,,specimen.type
 Collection_Group,,map_collection_group.Collection_Group
 Quantity,,"ifelse(specimen.unit == 'uL', specimen.amount / 1000, specimen.amount)"
 Quantity,,"ifelse(specimen.unit == 'oz', Quantity * 29.57, Quantity)"
-Quantity_Unit,,specimen.unit
+Quantity_Unit,,'mL'
 Storage_Container,,annotation.Storage_Container

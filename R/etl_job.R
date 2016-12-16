@@ -60,7 +60,7 @@ etl_job$methods(
     # job_location <- j$job_location
     source_table <- read.csv(paste0(job_location, "/source.csv"),
                              stringsAsFactors = FALSE) %>%
-      convert_white_to_NA()
+      process_char_columns()
     sources <- lapply(unique(source_table[["name"]]), function(source, table){
       table <- table %>%
         filter(name == source)
@@ -118,7 +118,7 @@ etl_job$methods(
   add_filter = function() {
     filter_table <- read.csv(paste0(job_location, "/filter.csv"),
                              stringsAsFactors = FALSE) %>%
-      convert_white_to_NA()
+      process_char_columns()
     .self$filter <- filter_table
   }
 )
@@ -129,7 +129,7 @@ etl_job$methods(
     # job_location <- j$job_location; source <- j$source
     joins <- read.csv(paste0(job_location, "/join.csv"),
                       stringsAsFactors = FALSE) %>%
-      convert_white_to_NA()
+      process_char_columns()
     joins_stacked <- rbind(
       joins %>%
         select(source1_name, source1_field),
@@ -155,7 +155,7 @@ etl_job$methods(
 
     transformations_table <- read.csv(paste0(job_location, "/transform.csv"),
                                       stringsAsFactors = FALSE) %>%
-      convert_white_to_NA()
+      process_char_columns()
     .self$transform <- transformations_table
 
   }
@@ -165,7 +165,7 @@ etl_job$methods(
   add_summarize = function() {
     summary_table <- read.csv(paste0(job_location, "/summarize.csv"),
                               stringsAsFactors = FALSE) %>%
-      convert_white_to_NA()
+      process_char_columns()
     .self$summarize <- summary_table
   }
 )
@@ -174,7 +174,7 @@ etl_job$methods(
   add_reshape = function() {
     reshape_table <- read.csv(paste0(job_location, "/reshape.csv"),
                               stringsAsFactors = FALSE) %>%
-      convert_white_to_NA()
+      process_char_columns()
     .self$reshape <- reshape_table
   }
 )
@@ -183,7 +183,7 @@ etl_job$methods(
   add_code = function() {
     code_table <- read.csv(paste0(job_location, "/code.csv"),
                            stringsAsFactors = FALSE) %>%
-      convert_white_to_NA()
+      process_char_columns()
     .self$code <- code_table
   }
 )
@@ -192,7 +192,7 @@ etl_job$methods(
   add_load = function(){
     load_table <- read.csv(paste0(job_location, "/load.csv"),
                            stringsAsFactors = FALSE) %>%
-      convert_white_to_NA()
+      process_char_columns()
     .self$load <- load_table
   }
 )

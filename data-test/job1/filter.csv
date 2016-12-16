@@ -1,3 +1,4 @@
 source,group_by,filter
 case,,"case %in% c('V01', 'BL')"
 specimen,,type != 'stool'
+,,Quantity > 1

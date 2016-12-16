@@ -18,9 +18,10 @@ process_join_table <- function(join_table) {
   return(join_table)
 }
 
-convert_white_to_NA <- function(df) {
+process_char_columns <- function(df) {
   for(i in names(df)) {
     if(class(df[[i]]) == "character") {
+      df[[i]] <- stringr::str_trim(df[[i]], "both")
       df[[i]][!grepl("\\S", df[[i]])] <- NA
     }
   }
