@@ -58,9 +58,12 @@ etl_job$methods(
 etl_job$methods(
   add_source = function() {
     # job_location <- j$job_location
-    source_table <- read.csv(paste0(job_location, "/source.csv"),
+    source_table <- read.csv(paste0(.self$job_location, "/source.csv"),
                              stringsAsFactors = FALSE) %>%
       process_char_columns()
+
+    if(dim(source_table)[1] <1 ) stop("you need sources")
+
     sources <- lapply(unique(source_table[["name"]]), function(source, table){
       table <- table %>%
         filter(name == source)
@@ -116,7 +119,8 @@ etl_job$methods(
 
 etl_job$methods(
   add_filter = function() {
-    filter_table <- read.csv(paste0(job_location, "/filter.csv"),
+    # job_location <- "../reconciliation_etl/ADNI_D"
+    filter_table <- read.csv(paste0(.self$job_location, "/filter.csv"),
                              stringsAsFactors = FALSE) %>%
       process_char_columns()
     .self$filter <- filter_table
@@ -127,43 +131,48 @@ etl_job$methods(
   add_join = function() {
 
     # job_location <- j$job_location; source <- j$source
-    joins <- read.csv(paste0(job_location, "/join.csv"),
+    joins <- read.csv(paste0(.self$job_location, "/join.csv"),
                       stringsAsFactors = FALSE) %>%
       process_char_columns()
-    joins_stacked <- rbind(
-      joins %>%
-        select(source1_name, source1_field),
-      joins %>%
-        select(source2_name, source2_field) %>%
-        rename(source1_name = source2_name, source1_field = source2_field)
-    )
 
-    apply(joins_stacked, 1, function(row, sources){
-      name <- row[["source1_name"]]
-      if(!name %in% names(sources)){
-        stop(paste("source name", name, "in joins.csv file is not in source.csv file"))
-      }
-    }, sources = source)
+    if(dim(joins)[1] > 0) {
+      joins_stacked <- rbind(
+        joins %>%
+          select(source1_name, source1_field),
+        joins %>%
+          select(source2_name, source2_field) %>%
+          rename(source1_name = source2_name, source1_field = source2_field)
+      )
 
+      apply(joins_stacked, 1, function(row, sources){
+        name <- row[["source1_name"]]
+        if(!name %in% names(sources)){
+          stop(paste("source name", name, "in joins.csv file is not in source.csv file"))
+        }
+      }, sources = source)
+    }
     .self$join <- joins
-
   }
 )
 
 etl_job$methods(
   add_transform = function() {
 
-    transformations_table <- read.csv(paste0(job_location, "/transform.csv"),
+    transformations_table <- read.csv(paste0(.self$job_location, "/transform.csv"),
                                       stringsAsFactors = FALSE) %>%
       process_char_columns()
     .self$transform <- transformations_table
+
+    if(dim(transformations_table)[1] == 0) {
+      stop("must have at least one record in the transform.csv file")
+    }
 
   }
 )
 
 etl_job$methods(
   add_summarize = function() {
-    summary_table <- read.csv(paste0(job_location, "/summarize.csv"),
+    summary_table <- read.csv(paste0(.self$job_location, "/summarize.csv"),
                               stringsAsFactors = FALSE) %>%
       process_char_columns()
     .self$summarize <- summary_table
@@ -172,7 +181,7 @@ etl_job$methods(
 
 etl_job$methods(
   add_reshape = function() {
-    reshape_table <- read.csv(paste0(job_location, "/reshape.csv"),
+    reshape_table <- read.csv(paste0(.self$job_location, "/reshape.csv"),
                               stringsAsFactors = FALSE) %>%
       process_char_columns()
     .self$reshape <- reshape_table
@@ -181,7 +190,7 @@ etl_job$methods(
 
 etl_job$methods(
   add_code = function() {
-    code_table <- read.csv(paste0(job_location, "/code.csv"),
+    code_table <- read.csv(paste0(.self$job_location, "/code.csv"),
                            stringsAsFactors = FALSE) %>%
       process_char_columns()
     .self$code <- code_table
@@ -190,7 +199,7 @@ etl_job$methods(
 
 etl_job$methods(
   add_load = function(){
-    load_table <- read.csv(paste0(job_location, "/load.csv"),
+    load_table <- read.csv(paste0(.self$job_location, "/load.csv"),
                            stringsAsFactors = FALSE) %>%
       process_char_columns()
     .self$load <- load_table

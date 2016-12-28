@@ -1,10 +1,10 @@
 etl_job_in_memory <- setRefClass("etl_job_in_memory",
                                  contains = "etl_job",
-                                 fields = c("source_tables", "merged_table"))
+                                 fields = c("source_tables", "output_table"))
 
 etl_job_in_memory$methods(
   source_data = function(supported_types = "csv") {
-    # sources <- j$source
+    # .self <- j
     sources <- .self$source
     types <- sapply(sources, function(x) x$type)
 
@@ -13,16 +13,11 @@ etl_job_in_memory$methods(
     }
 
     tables <- lapply(sources, function(source) {
-      # source <- sources[[5]]
+      # source <- sources[[1]]
       if(source$type == "csv"){
-        table <- source_csv(source$location, source$fields$field,
-                            source$fields$field_type)
-        for(i in names(table)){
-          if(class(table[[i]]) == "character"){
-            table[[i]][!grepl("\\S", table[[i]])] <- NA
-            table[[i]] <- stringr::str_trim(table[[i]], "both")
-          }
-        }
+        table <- source_csv(source$source, source$location, source$fields$field,
+                            source$fields$field_type) %>%
+          process_char_columns()
       }
       return(table)
     })
@@ -64,7 +59,8 @@ etl_job_in_memory$methods(
         }
         .self$source_tables[[source_name]] <- .self$source_tables[[source_name]] %>%
           filter_(source_filter) %>%
-          ungroup()
+          ungroup() %>%
+          as.data.frame()
 
       }
 
@@ -94,12 +90,14 @@ etl_job_in_memory$methods(
           fields <- reshape_table[i, "fields"]
           fields <- strsplit(fields, "|", fixed = TRUE)[[1]]
           .self$source_tables[[source_name]] <- .self$source_tables[[source_name]] %>%
-            gather_(key_col = key, value_col = value, gather_cols = fields)
+            gather_(key_col = key, value_col = value, gather_cols = fields) %>%
+            as.data.frame()
 
         } else if(grepl("spread", reshape_type)) {
 
           .self$source_tables[[source_name]] <- .self$source_tables[[source_name]] %>%
-            spread_(key_col = key, value_col = value)
+            spread_(key_col = key, value_col = value) %>%
+            as.data.frame()
           names(.self$source_tables[[source_name]]) <- stringr::str_trim(names(.self$source_tables[[source_name]]), "both")
           names(.self$source_tables[[source_name]]) <- gsub("\\s", "_", names(.self$source_tables[[source_name]]))
 
@@ -140,11 +138,6 @@ etl_job_in_memory$methods(
                    "not valid join type(s)"))
       }
 
-      for(k in source_names) {
-        names(.self$source_tables[[k]]) <- paste(k, names(.self$source_tables[[k]]),
-                                                 sep = ".")
-      }
-
       # for(k in source_names) {
       #   # k <- source_names[1]
       #   names(j$source_tables[[k]]) <- paste(k, names(j$source_tables[[k]]), sep = ".")
@@ -159,9 +152,10 @@ etl_job_in_memory$methods(
 
       join_function <- eval(parse(text = paste0(unique(join[, "type"]), "_join")))
 
-      .self$merged_table <- join_function(.self$source_tables[[unique(join$source1_name)]],
+      .self$output_table <- join_function(.self$source_tables[[unique(join$source1_name)]],
                                           .self$source_tables[[unique(join$source2_name)]],
-                                          join_by)
+                                          join_by) %>%
+        as.data.frame()
 
       .self$source_tables[[unique(join$source1_name)]] <- NULL
       .self$source_tables[[unique(join$source2_name)]] <- NULL
@@ -182,13 +176,19 @@ etl_job_in_memory$methods(
 
           join_function <- eval(parse(text = paste0(unique(join[, "type"]), "_join")))
 
-          .self$merged_table <- join_function(.self$merged_table,
+          .self$output_table <- join_function(.self$output_table,
                                               .self$source_tables[[unique(join$source2_name)]],
-                                              join_by)
+                                              join_by) %>%
+            as.data.frame()
           .self$source_tables[[unique(join$source2_name)]] <- NULL
         }
       }
 
+    } else {
+      if(length(.self$source_tables) > 1) {
+        stop("must provide information in join table for merging sources")
+      }
+      .self$output_table <- .self$source_tables[[1]]
     }
 
   }
@@ -210,14 +210,15 @@ etl_job_in_memory$methods(
         if(!is.na(trans_table[i, "group_by"])) {
 
           trans_group_by <- as.list(strsplit(trans_table[i, "group_by"], "\\|")[[1]])
-          .self$merged_table <- .self$merged_table %>%
+          .self$output_table <- .self$output_table %>%
             group_by_(.dots = trans_group_by)
 
         }
 
-        .self$merged_table <- .self$merged_table %>%
+        .self$output_table <- .self$output_table %>%
           mutate_(.dots = trans_filter) %>%
-          ungroup()
+          ungroup() %>%
+          as.data.frame()
 
       }
 
@@ -241,14 +242,15 @@ etl_job_in_memory$methods(
         if(!is.na(filter_table[i, "group_by"])) {
 
           output_group_by <- as.list(strsplit(filter_table[i, "group_by"], "\\|")[1])
-          .self$merged_table <- .self$merged_table %>%
+          .self$output_table <- .self$output_table %>%
             group_by_(.dots = output_group_by)
 
         }
 
-        .self$merged_table <- .self$merged_table %>%
+        .self$output_table <- .self$output_table %>%
           filter_(output_filter) %>%
-          ungroup()
+          ungroup() %>%
+          as.data.frame()
 
       }
 
@@ -273,14 +275,15 @@ etl_job_in_memory$methods(
         if(!is.na(sum_table[i, "group_by"])) {
 
           sum_group_by <- as.list(strsplit(sum_table[i, "group_by"], "\\|")[[1]])
-          .self$merged_table <- .self$merged_table %>%
+          .self$output_table <- .self$output_table %>%
             group_by_(.dots = sum_group_by)
 
         }
 
-        .self$merged_table <- .self$merged_table %>%
+        .self$output_table <- .self$output_table %>%
           summarize_(.dots = output_summary) %>%
-          ungroup()
+          ungroup() %>%
+          as.data.frame()
 
       }
 
@@ -307,15 +310,17 @@ etl_job_in_memory$methods(
 
         fields <- reshape_table[, "fields"]
         fields <- strsplit(fields, "|", fixed = TRUE)[[1]]
-        .self$merged_table <- .self$merged_table %>%
-          gather_(key_col = key, value_col = value, gather_cols = fields)
+        .self$output_table <- .self$output_table %>%
+          gather_(key_col = key, value_col = value, gather_cols = fields) %>%
+          as.data.frame()
 
       } else if(grepl("spread", reshape_type)) {
 
-        .self$merged_table <- .self$merged_table %>%
-          spread_(key_col = key, value_col = value)
-        names(.self$merged_table) <- stringr::str_trim(names(.self$merged_table), "both")
-        names(.self$merged_table) <- gsub("\\s", "_", names(.self$merged_table))
+        .self$output_table <- .self$output_table %>%
+          spread_(key_col = key, value_col = value) %>%
+          as.data.frame()
+        names(.self$output_table) <- stringr::str_trim(names(.self$output_table), "both")
+        names(.self$output_table) <- gsub("\\s", "_", names(.self$output_table))
 
       } else {
 
@@ -328,5 +333,50 @@ etl_job_in_memory$methods(
   }
 )
 
+etl_job_in_memory$methods(
 
+  load_data = function() {
+    # .self <- j
+    type <- unique(.self$load$type[!is.na(.self$load$type)])
+    if(length(type) > 1) stop("load type can only have one value")
+
+    location <- unique(.self$load$location[!is.na(.self$load$location)])
+    if(length(location) > 1) stop("load location can only have one value")
+
+    append <- unique(.self$load$append[!is.na(.self$load$append)])
+    if(length(append) > 1) stop("load append can only have one value")
+
+    fields <- unique(.self$load$fields[!is.na(.self$load$fields)])
+    if(length(fields) > 1) stop("load fields should only have one value, with fields separated by |")
+    if(length(fields) == 0) {
+      fields <- unique(.self$transform$new_field)
+    } else {
+      fields <- strsplit(fields, "\\|")[[1]]
+    }
+
+    .self$output_table <- .self$output_table[, fields]
+
+    if(tolower(type) == "csv") {
+      if(append) {
+        headers <- names(read.csv(.self$load$location, nrows = 1))
+        if(sum(!names(.self$output_table) %in% headers) > 0) {
+          stop(paste("cannot append load data to table because column(s) do not match:",
+               names(.self$output_table)[!names(.self$output_table) %in% headers]))
+        }
+        for(i in headers){
+          # i = headers[1]
+          if(!i %in% names(.self$output_table)) {
+            .self$output_table[[i]] <- NA
+          }
+        }
+        .self$output_table <- .self$output_table[, headers]
+      }
+      write.table(.self$output_table, file = location,
+                  append = .self$load$append, row.names = FALSE,
+                  qmethod = "double", col.names = !.self$load$append,
+                  sep = ",")
+    }
+  }
+
+)
 

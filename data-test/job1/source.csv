@@ -1,10 +1,10 @@
 name,location,type,field,field_type
-subject,/media/R/nrbyers/Repositories/etljobs/data-test/sources/subjects.csv,csv,subject_id,
+subject,./data-test/sources/subjects.csv,csv,subject_id,
 subject,,,gender,
 subject,,,birth_year,integer
 subject,,,race,
-case,/media/R/nrbyers/Repositories/etljobs/data-test/sources/cases.csv,csv,,
-specimen,/media/R/nrbyers/Repositories/etljobs/data-test/sources/specimens.csv,csv,,
-annotation,/media/R/nrbyers/Repositories/etljobs/data-test/sources/annotations.csv,csv,,
-map_collection_group,/media/R/nrbyers/Repositories/etljobs/data-test/sources/map-collection_group.csv,csv,,
-wide_annotation,/media/R/nrbyers/Repositories/etljobs/data-test/sources/wide_annotations.csv,csv,,
+case,./data-test/sources/cases.csv,csv,,
+specimen,./data-test/sources/specimens.csv,csv,,
+annotation,./data-test/sources/annotations.csv,csv,,
+map_collection_group,./data-test/sources/map-collection_group.csv,csv,,
+wide_annotation,./data-test/sources/wide_annotations.csv,csv,,

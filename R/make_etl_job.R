@@ -15,30 +15,31 @@ make_etl_job <- function(location = ".", name){
   }
   dir.create(location)
 
-  writeLines(c("name", "location", "type", "field", "field_type"),
-    con = paste0(location, "/source.csv"), sep = ",")
+  writeLines(paste("name", "location", "type", "table", "field", "field_type",
+                   sep = ","), con = paste0(location, "/source.csv"))
 
-  writeLines(c("source1_name", "source1_field", "source2_name",
-               "source2_field", "type"),
-    con = paste0(location, "/join.csv"), sep = ",")
+  writeLines(paste("source1_name", "source1_field", "source2_name",
+                   "source2_field", "type", sep = ","),
+             con = paste0(location, "/join.csv"))
 
-  writeLines(c("new_field", "group_by", "transformation"),
-    con = paste0(location, "/transform.csv"),sep = ",")
+  writeLines(paste("new_field", "group_by", "transformation", sep = ","),
+             con = paste0(location, "/transform.csv"))
 
-  writeLines(c("location", "type", "table", "append"),
-    con = paste0(location, "/load.csv"), sep = ",")
+  writeLines(paste("location", "type", "table", "fields", "append",
+                   sep = ","), con = paste0(location, "/load.csv"))
 
-  writeLines(c("field", "field_type", "code", "recode_value", "recode_field_type"),
-             con = paste0(location, "/recode.csv"), sep = ",")
+  writeLines(paste("field", "field_type", "code", "recode_value",
+                   "recode_field_type", sep = ","),
+             con = paste0(location, "/recode.csv"))
 
-  writeLines(c("new_field", "group_by", "summarize"),
-             con = paste0(location, "/summarize.csv"), sep = ",")
+  writeLines(paste("new_field", "group_by", "summarize", sep = ","),
+             con = paste0(location, "/summarize.csv"))
 
-  writeLines(c("source", "group_by", "filter"),
-             con = paste0(location, "/filter.csv"), sep = ",")
+  writeLines(paste("source", "group_by", "filter", sep = ","),
+             con = paste0(location, "/filter.csv"))
 
-  writeLines(c("source", "type", "key", "value"),
-             con = paste0(location, "/reshape.csv"), sep = ",")
+  writeLines(paste("source", "type", "key", "value", sep = ","),
+             con = paste0(location, "/reshape.csv"))
 
   writeLines(as.yaml(list(language = "R")),
             con = paste0(location, "/job.yaml"))
