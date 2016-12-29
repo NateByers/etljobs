@@ -28,8 +28,7 @@ make_etl_job <- function(location = ".", name){
   writeLines(paste("location", "type", "table", "fields", "append",
                    sep = ","), con = paste0(location, "/load.csv"))
 
-  writeLines(paste("field", "field_type", "code", "recode_value",
-                   "recode_field_type", sep = ","),
+  writeLines(paste("field", "code", "recode_value", sep = ","),
              con = paste0(location, "/recode.csv"))
 
   writeLines(paste("new_field", "group_by", "summarize", sep = ","),

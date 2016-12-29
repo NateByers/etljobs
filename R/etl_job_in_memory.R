@@ -70,6 +70,24 @@ etl_job_in_memory$methods(
 )
 
 etl_job_in_memory$methods(
+  recode_sources = function() {
+    # .self <- j
+    for(i in 1:length(.self$source_tables)) {
+      # i <- 1
+      for(j in names(.self$source_tables[[i]])) {
+        # j <- "demo.PTGENDER"
+        if(j %in% .self$recode$field) {
+          recode_table <- .self$recode %>%
+            filter(field == j)
+          .self$source_tables[[i]][[j]] <- as.character(.self$source_tables[[i]][[j]])
+          .self$source_tables[[i]][[j]][.self$source_tables[[i]][[j]] %in% recode_table[["code"]]] <- recode_table[match(.self$source_tables[[i]][[j]][.self$source_tables[[i]][[j]] %in% recode_table[["code"]]], recode_table[, "code"]), "recode_value"]
+        }
+      }
+    }
+  }
+)
+
+etl_job_in_memory$methods(
   reshape_sources = function() {
     # .self <- j
     reshape_table <- .self$reshape %>%
@@ -203,6 +221,8 @@ etl_job_in_memory$methods(
     if(dim(trans_table)[1] > 0) {
 
       for(i in 1:dim(trans_table)[1]) {
+
+        # i = 6
 
         trans_filter <- list(trans_table[i, "transformation"])
         names(trans_filter) <- trans_table[i, "new_field"]
@@ -354,7 +374,9 @@ etl_job_in_memory$methods(
       fields <- strsplit(fields, "\\|")[[1]]
     }
 
-    .self$output_table <- .self$output_table[, fields]
+    .self$output_table <- .self$output_table %>%
+      select_(.dots = fields) %>%
+      distinct()
 
     if(tolower(type) == "csv") {
       if(append) {

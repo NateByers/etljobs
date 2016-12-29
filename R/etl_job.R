@@ -57,19 +57,24 @@ etl_job$methods(
 
 etl_job$methods(
   add_source = function() {
-    # job_location <- j$job_location
+    # .self <- j
     source_table <- read.csv(paste0(.self$job_location, "/source.csv"),
                              stringsAsFactors = FALSE) %>%
       process_char_columns()
 
     if(dim(source_table)[1] <1 ) stop("you need sources")
 
-    sources <- lapply(unique(source_table[["name"]]), function(source, table){
+    source_names <- unique(source_table[["name"]])[!is.na(unique(source_table[["name"]]))]
+
+    sources <- lapply(source_names, function(source, table){
+      # source <- source_names[1]; table <- source_table
+
       table <- table %>%
         filter(name == source)
 
       location <- table %>%
         filter(!is.na(location), grepl("\\S", location)) %>%
+        select(location) %>%
         distinct()
       if(dim(location)[1] == 0){
         stop("please provide location in source.csv file")
@@ -81,6 +86,7 @@ etl_job$methods(
 
       type <- table %>%
         filter(!is.na(type), grepl("\\S", type)) %>%
+        select(type) %>%
         distinct()
       if(dim(type)[1] == 0){
         stop("please provide type in source.csv file")
@@ -124,6 +130,17 @@ etl_job$methods(
                              stringsAsFactors = FALSE) %>%
       process_char_columns()
     .self$filter <- filter_table
+  }
+)
+
+etl_job$methods(
+  add_recode = function() {
+    # job_location <- "../reconciliation_etl/ADNI_D"
+    recode_table <- read.csv(paste0(.self$job_location, "/recode.csv"),
+                             colClasses = "character",
+                             stringsAsFactors = FALSE) %>%
+      process_char_columns()
+    .self$recode <- recode_table
   }
 )
 

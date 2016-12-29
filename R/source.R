@@ -27,7 +27,7 @@ source_csv <- function(source_name, location, fields, types){
     }, types = types)
   }
 
-  df <- read.csv(location, colClasses = column_types) %>%
+  df <- read.csv(location, colClasses = column_types, stringsAsFactors = FALSE) %>%
     select_(.dots = fields)
 
   names(df) <- paste(source_name, names(df), sep = ".")
