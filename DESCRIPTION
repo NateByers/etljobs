@@ -9,12 +9,13 @@ License: GPL-3
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 5.0.1
-Depends: dplyr, tidyr, yaml, stringr
+Depends: dplyr, tidyr, yaml, stringr, RODBC
 Suggests: testthat
 Collate:
      'etl_job.R'
      'etl_job_in_memory.R'
      'source.R'
+     'load.R'
      'helpers.R'
      'make_etl_job.R'
      'run_etl_job.R'

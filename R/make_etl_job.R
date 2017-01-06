@@ -15,6 +15,9 @@ make_etl_job <- function(location = ".", name){
   }
   dir.create(location)
 
+  writeLines(paste("type", "name", "username", "password", sep = ","),
+             con = paste0(location, "/connect.csv"))
+
   writeLines(paste("name", "location", "type", "table", "field", "field_type",
                    sep = ","), con = paste0(location, "/source.csv"))
 
@@ -25,7 +28,7 @@ make_etl_job <- function(location = ".", name){
   writeLines(paste("new_field", "group_by", "transformation", sep = ","),
              con = paste0(location, "/transform.csv"))
 
-  writeLines(paste("location", "type", "table", "fields", "append",
+  writeLines(paste("endpoint", "type", "table", "fields", "append",
                    sep = ","), con = paste0(location, "/load.csv"))
 
   writeLines(paste("field", "code", "recode_value", sep = ","),

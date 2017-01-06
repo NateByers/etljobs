@@ -1,0 +1,4 @@
+new_field,group_by,transformation
+Subject_ID,,subject.subject_id
+Sex,,subject.gender
+Race,,subject.race

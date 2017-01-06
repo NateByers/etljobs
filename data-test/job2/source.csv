@@ -1,0 +1,2 @@
+name,location,type,field,field_type
+subject,./data-test/sources/subjects.csv,csv,,

@@ -1,7 +1,7 @@
 etl_job <- setRefClass("etl_job",
-                       fields = c("job_location", "parameters", "source",
-                                  "filter", "join", "transform", "recode",
-                                  "reshape", "summarize", "load"))
+                       fields = c("job_location", "parameters", "connect",
+                                  "source", "filter", "join", "transform",
+                                  "recode", "reshape", "summarize", "load"))
 
 etl_job$methods(
   initialize = function(location,
@@ -54,6 +54,16 @@ etl_job$methods(
 
   }
 )
+
+etl_job$methods(
+  add_connect = function() {
+    connect_table <- read.csv(paste0(.self$job_location, "/connect.csv"),
+                           stringsAsFactors = FALSE) %>%
+      process_char_columns()
+    .self$connect <- connect_table
+  }
+)
+
 
 etl_job$methods(
   add_source = function() {

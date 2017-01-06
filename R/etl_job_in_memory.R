@@ -360,11 +360,13 @@ etl_job_in_memory$methods(
     type <- unique(.self$load$type[!is.na(.self$load$type)])
     if(length(type) > 1) stop("load type can only have one value")
 
-    location <- unique(.self$load$location[!is.na(.self$load$location)])
-    if(length(location) > 1) stop("load location can only have one value")
+    endpoint <- unique(.self$load$endpoint[!is.na(.self$load$endpoint)])
+    if(length(endpoint) > 1) stop("load endpoint can only have one value")
+    if(length(endpoint) == 0) stop("load must have an endpoint value")
 
     append <- unique(.self$load$append[!is.na(.self$load$append)])
     if(length(append) > 1) stop("load append can only have one value")
+    if(length(append) == 0) append <- FALSE
 
     fields <- unique(.self$load$fields[!is.na(.self$load$fields)])
     if(length(fields) > 1) stop("load fields should only have one value, with fields separated by |")
@@ -379,24 +381,10 @@ etl_job_in_memory$methods(
       distinct()
 
     if(tolower(type) == "csv") {
-      if(append) {
-        headers <- names(read.csv(.self$load$location, nrows = 1))
-        if(sum(!names(.self$output_table) %in% headers) > 0) {
-          stop(paste("cannot append load data to table because column(s) do not match:",
-               names(.self$output_table)[!names(.self$output_table) %in% headers]))
-        }
-        for(i in headers){
-          # i = headers[1]
-          if(!i %in% names(.self$output_table)) {
-            .self$output_table[[i]] <- NA
-          }
-        }
-        .self$output_table <- .self$output_table[, headers]
-      }
-      write.table(.self$output_table, file = location,
-                  append = .self$load$append, row.names = FALSE,
-                  qmethod = "double", col.names = !.self$load$append,
-                  sep = ",")
+      load_csv_in_memory(endpoint, append)
+    }
+    if(tolower(type) == "odbc") {
+      load_odbc_in_memory(endpoint, table, append)
     }
   }
 
