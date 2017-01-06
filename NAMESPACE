@@ -2,3 +2,5 @@
 
 export(make_etl_job)
 export(run_etl_job)
+export(set_odbc_credential)
+export(unset_odbc_credential)

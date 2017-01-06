@@ -1,2 +1,2 @@
-endpoint,type,table,fields,append
-etljobs_test,odbc,job2,,TRUE
+endpoint,type,schema,table,fields,append
+etljobs_test,odbc,,job2,,TRUE

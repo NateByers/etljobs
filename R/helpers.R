@@ -28,6 +28,12 @@ process_char_columns <- function(df) {
   return(df)
 }
 
+etl_job_stop <- function(message) {
+  odbcCloseAll()
+  stop(message)
+}
+
+
 
 
 # join_table <- read.table(header = TRUE, stringsAsFactors = FALSE, text = '

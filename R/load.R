@@ -20,9 +20,15 @@ load_csv_in_memory <- function(endpoint, fields, append){
 }
 
 
-load_odbc_in_memory <- function(endpoint, table, append) {
-
+load_odbc_in_memory <- function(endpoint, table, schema, append) {
+  connection <- sapply(.self$connections, function(x) x$type == "odbc" & x$dsn == endpoint)
+  if(sum(connection) != 1) etl_job_stop("load odbc endpoint must match exactly one connection")
+  connection <- .self$connections[[which(connection == TRUE)]]$connection
+  tables <- sqlTables(connection)
+  if(!table %in% tables[["TABLE_NAME"]]) etl_job_stop("load table not found in odbc endpoint")
+  if(!is.na(schema)) paste(schema, table, sep = ".")
   if(append) {
+    db
     #headers <-
   }
 }

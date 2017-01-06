@@ -1,6 +1,39 @@
 etl_job_in_memory <- setRefClass("etl_job_in_memory",
                                  contains = "etl_job",
-                                 fields = c("source_tables", "output_table"))
+                                 fields = c("connections", "source_tables",
+                                            "output_table"))
+
+etl_job_in_memory$methods(
+  make_connections = function() {
+    #.self <- j
+    .self$connections <- apply(.self$connect, 1, function(row) {
+      # row <- .self$connect[1, ]
+      if(tolower(row["type"]) == "odbc"){
+        dsn <- row["name"]
+        usr <- row["username"]
+        if(is.na(usr)) {
+          usr <- grep(paste0(toupper(dsn), "_USR"), names(Sys.getenv()), value = TRUE)
+          if(length(usr) == 0) {
+            usr <- ""
+          } else {
+            usr <- Sys.getenv(usr)
+          }
+        }
+        pwd <- row["password"]
+        if(is.na(pwd)) {
+          pwd <- grep(paste0("^", toupper(dsn), "_PWD"), names(Sys.getenv()), value = TRUE)
+          if(length(pwd) == 0) {
+            pwd <- ""
+          } else {
+            pwd <- Sys.getenv(pwd)
+          }
+        }
+        con <- odbcConnect(dsn = dsn, uid = usr, pwd = pwd)
+        return(list(type = "odbc", dsn = dsn, connection = con))
+      }
+    })
+  }
+)
 
 etl_job_in_memory$methods(
   source_data = function(supported_types = "csv") {
@@ -384,7 +417,8 @@ etl_job_in_memory$methods(
       load_csv_in_memory(endpoint, append)
     }
     if(tolower(type) == "odbc") {
-      load_odbc_in_memory(endpoint, table, append)
+      load_odbc_in_memory(endpoint, table = .self$load$table,
+                          schema = .self$load$schema, append)
     }
   }
 
