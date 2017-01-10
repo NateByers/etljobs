@@ -1,2 +1,11 @@
 language: R
 
+
+pass_parameters:
+  odbcConnect: 
+    colQuote: ""
+    rows_at_time: 1000
+    test: 
+        - this
+        - that
+    

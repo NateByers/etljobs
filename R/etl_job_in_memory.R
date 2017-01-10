@@ -28,6 +28,7 @@ etl_job_in_memory$methods(
             pwd <- Sys.getenv(pwd)
           }
         }
+        con <- pass_parameters(func = "odbcConnect", .dots = list(dsn=dsn, uid = usr, pwd = pwd))
         con <- odbcConnect(dsn = dsn, uid = usr, pwd = pwd)
         return(list(type = "odbc", dsn = dsn, connection = con))
       }

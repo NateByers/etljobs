@@ -33,16 +33,43 @@ etl_job_stop <- function(message) {
   stop(message)
 }
 
+pass_parameters <- function(func, .dots) {
+  # .self <- j; func <- "odbcConnect"
+  parameters <- .self$parameters$pass_parameters[[func]]
+  if(!is.null(parameters)) {
+    for(i in names(parameters)) {
+      .dots[[i]] <- parameters[[i]]
+    }
+  }
+  function_text <- paste0(func, "(", names(.dots[[1]]), " = ", make_vector_text(.dots[[1]]))
+  if(length(.dots) > 1) {
+    for(i in names(.dots)) {
+      # i = 1
+      value <- parameters[[i]]
+      value <- make_vector_text(value)
+      function_text <- paste0(function_text, ", ", i, " = ", value)
+    }
+  }
+  function_text <- paste0(function_text, ")")
+}
 
-
-
-# join_table <- read.table(header = TRUE, stringsAsFactors = FALSE, text = '
-# source1_name  source1_field  source2_name  source2_field  type
-# subject       subject_id     case          patient_id     left
-# case          patient_id     specimen      subject_mrn    left
-# case          visit          specimen      event          left
-# specimen      subject_mrn    annotation    guy_d          left
-# specimen      event          annotation    time_point     left
-# specimen      specimen_id    annotation    barcode        left
-# case          patient_id     map_case      case_subj_id   left
-#                     ')
+make_vector_text <- function(vector) {
+  # vector = c("this", "that")
+  if(class(vector) == "character") {
+    vector_text <- paste0("c('", vector[1], "'")
+    if(length(vector) > 1) {
+      for(i in vector[-1]) {
+        vector_text <- paste0(vector_text, ", '", i, "'")
+      }
+    }
+  } else {
+    vector_text <- paste0("c(", vector[1])
+    if(length(vector) > 1) {
+      for(i in vector[-1]) {
+        vector_text <- paste0(vector_text, ", ", i)
+      }
+    }
+  }
+  vector_text <- paste0(vector_text, ")")
+  return(vector_text)
+}
