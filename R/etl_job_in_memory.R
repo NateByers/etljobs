@@ -195,14 +195,14 @@ etl_job_in_memory$methods(
       #   names(j$source_tables[[k]]) <- paste(k, names(j$source_tables[[k]]), sep = ".")
       # }
 
-      join <- left_join(join_sets[1, ], joins_table,
+      join_ <- left_join(join_sets[1, ], joins_table,
                         c("source_combo", "source1_name", "source2_name", "type"))
 
-      join_by <- join[, "source2_field"]
+      join_by <- join_[, "source2_field"]
 
-      names(join_by) <- join[, "source1_field"]
+      names(join_by) <- join_[, "source1_field"]
 
-      join_function <- eval(parse(text = paste0(unique(join[, "type"]), "_join")))
+      join_function <- eval(parse(text = paste0(unique(join_[, "type"]), "_join")))
 
       .self$output_table <- join_function(.self$source_tables[[unique(join$source1_name)]],
                                           .self$source_tables[[unique(join$source2_name)]],
@@ -219,14 +219,14 @@ etl_job_in_memory$methods(
       if(dim(join_sets)[1] > 1){
         for(i in 2:dim(join_sets)[1]) {
           # i = 2
-          join <- left_join(join_sets[i, ], joins_table,
+          join_ <- left_join(join_sets[i, ], joins_table,
                             c("source_combo", "source1_name", "source2_name", "type"))
 
-          join_by <- join[, "source2_field"]
+          join_by <- join_[, "source2_field"]
 
-          names(join_by) <- join[, "source1_field"]
+          names(join_by) <- join_[, "source1_field"]
 
-          join_function <- eval(parse(text = paste0(unique(join[, "type"]), "_join")))
+          join_function <- eval(parse(text = paste0(unique(join_[, "type"]), "_join")))
 
           .self$output_table <- join_function(.self$output_table,
                                               .self$source_tables[[unique(join$source2_name)]],
@@ -415,10 +415,10 @@ etl_job_in_memory$methods(
       distinct()
 
     if(tolower(type) == "csv") {
-      load_csv_in_memory(endpoint, append)
+      load_csv_in_memory(.self$output_table, endpoint, fields, append)
     }
     if(tolower(type) == "odbc") {
-      load_odbc_in_memory(endpoint, table = .self$load$table,
+      load_odbc_in_memory(.self$output_table, endpoint, table = .self$load$table,
                           schema = .self$load$schema, append)
     }
   }

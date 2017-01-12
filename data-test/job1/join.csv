@@ -1,8 +1,1 @@
 source1_name,source1_field,source2_name,source2_field,type
-subject,subject_id,case,subject_mrn,left
-case,subject_mrn,specimen,patient_id,left
-case,case,specimen,case,left
-specimen,patient_id,annotation,subject_id,left
-specimen,barcode,annotation,barcode,left
-annotation,type,map_collection_group,Specimen_Type,left
-annotation,Collection_Container,map_collection_group,Collection_Container,left

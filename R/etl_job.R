@@ -29,25 +29,10 @@ etl_job$methods(
 )
 
 etl_job$methods(
-  add_parameters = function() {
-
-    params <- suppressWarnings(yaml.load_file(paste0(job_location, "/job.yaml")))
+  add_parameters = function(params) {
 
     if (params$language[1] != "R") {
       stop("job yaml file does not indicate R as the programming language")
-    }
-
-    if (!"order" %in% names(params)) {
-      params$order <- c("source", "filter", "reshape", "join", "transform",
-                        "code", "summarize", "reshape", "load")
-    }
-
-    if (params$order[1] != "source") {
-      stop("'source' must be first in the order parameter")
-    }
-
-    if (last(params$order) != "load") {
-      stop("'load' must be the last in the order parameter")
     }
 
     .self$parameters <- params
@@ -232,3 +217,4 @@ etl_job$methods(
     .self$load <- load_table
   }
 )
+

@@ -1,2 +1,2 @@
 endpoint,type,table,fields,append
-/media/R/nrbyers/Repositories/etljobs/data-test/output/transformed_specimens.csv,csv,,,TRUE
+../../data-test/output/transformed_subjects.csv,csv,,,FALSE

@@ -7,13 +7,18 @@
 run_etl_job <- function(job_location) {
   # job_location = "data-test/job1"
 
-  implementation <- get_implementation(job_location)
-
+  params <- suppressWarnings(yaml::yaml.load_file(paste0(location, "/job.yaml")))
+  if (!"implementation" %in% names(params)) {
+    implementation <- "in-memory"
+  } else {
+    implementation <- params$implementation
+  }
+  
   if(implementation == "in-memory") {
-    j <- etl_job_in_memory$new(job_location)
+    j <- etljobs:::etl_job_in_memory$new(job_location)
   }
 
-  j$add_parameters()
+  j$add_parameters(params)
   j$add_source()
   j$add_filter()
   j$add_recode()
@@ -35,13 +40,3 @@ run_etl_job <- function(job_location) {
 
 }
 
-get_implementation <- function(location){
-  # location <- "data-test/job1"
-  params <- suppressWarnings(yaml.load_file(paste0(location, "/job.yaml")))
-  if (!"implementation" %in% names(params)) {
-    implementation <- "in-memory"
-  } else {
-    implementation <- params$implementation
-  }
-  return(implementation)
-}

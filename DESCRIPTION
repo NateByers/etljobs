@@ -9,7 +9,12 @@ License: GPL-3
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 5.0.1
-Depends: dplyr, tidyr, yaml, stringr, RODBC
+Imports: 
+    dplyr,
+    tidyr,
+    yaml, 
+    stringr,
+    RODBC
 Suggests: testthat
 Collate:
      'helpers.R'

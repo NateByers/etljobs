@@ -1,5 +1,1 @@
 field,code,recode_value,recode_field_type
-Sex,M,0,integer
-Sex,F,1,integer
-Quantity_Unit,uL,mL,
-Quantity_Unit,oz,mL,
