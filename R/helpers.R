@@ -1,7 +1,7 @@
 process_join_table <- function(join_table) {
 
   join_table <- join_table %>%
-    mutate(source_combo = paste(source1_name, source2_name),
+    dplyr::mutate(source_combo = paste(source1_name, source2_name),
            source1_field = paste(source1_name, source1_field, sep = "."),
            source2_field = paste(source2_name, source2_field, sep = "."))
 
@@ -9,7 +9,7 @@ process_join_table <- function(join_table) {
     # i = 2
     field <- join_table[i, "source1_field"]
     match_subset <- join_table %>%
-      filter(source2_field == field)
+      dplyr::filter(source2_field == field)
         if(dim(match_subset)[1] == 1) {
           join_table[i, "source1_field"] <- match_subset[["source1_field"]]
         }
@@ -29,7 +29,7 @@ process_char_columns <- function(df) {
 }
 
 etl_job_stop <- function(message) {
-  odbcCloseAll()
+  RODBC::odbcCloseAll()
   stop(message)
 }
 

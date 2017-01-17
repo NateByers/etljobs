@@ -7,7 +7,7 @@
 run_etl_job <- function(job_location) {
   # job_location = "data-test/job1"
 
-  params <- suppressWarnings(yaml::yaml.load_file(paste0(location, "/job.yaml")))
+  params <- suppressWarnings(yaml::yaml.load_file(paste0(job_location, "/job.yaml")))
   if (!"implementation" %in% names(params)) {
     implementation <- "in-memory"
   } else {
@@ -15,7 +15,7 @@ run_etl_job <- function(job_location) {
   }
   
   if(implementation == "in-memory") {
-    j <- etljobs:::etl_job_in_memory$new(job_location)
+    j <- etl_job_in_memory$new(job_location)
   }
 
   j$add_parameters(params)

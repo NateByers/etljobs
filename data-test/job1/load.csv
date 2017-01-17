@@ -1,2 +1,2 @@
 endpoint,type,table,fields,append
-../../data-test/output/transformed_subjects.csv,csv,,,FALSE
+../../data-test/output/job1.csv,csv,,,FALSE

@@ -43,6 +43,9 @@ make_etl_job <- function(location = ".", name){
   writeLines(paste("source", "type", "key", "value", sep = ","),
              con = paste0(location, "/reshape.csv"))
 
-  writeLines(as.yaml(list(language = "R")),
+  etljobs_package <- installed.packages() %>%
+    dplyr::filter(Package == "etljobs")
+  
+  writeLines(as.yaml(list(etljobs = etljobs_package[["Version"]])),
             con = paste0(location, "/job.yaml"))
 }

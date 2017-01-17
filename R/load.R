@@ -22,31 +22,30 @@ load_csv_in_memory <- function(df, endpoint, fields, append){
 
 load_odbc_in_memory <- function(df, endpoint, table, schema, append) {
   connection <- sapply(.self$connections, function(x) x$type == "odbc" & x$dsn == endpoint)
-
+  
   if(sum(connection) != 1) etl_job_stop("load odbc endpoint must match exactly one connection")
-
+  
   connection <- .self$connections[[which(connection == TRUE)]]$connection
-  tables <- sqlTables(connection)
-
+  tables <- RODBC::sqlTables(connection)
+  
   if(!table %in% tables[["TABLE_NAME"]]) etl_job_stop("load table not found in odbc endpoint")
-
+  
   if(!is.na(schema)) table <- paste(schema, table, sep = ".")
-
-
-  db_fields <- sqlColumns(connection, table)[["COLUMN_NAME"]]
+  
+  db_fields <- RODBC::sqlColumns(connection, table)[["COLUMN_NAME"]]
   output_columns <- names(df)
-
+  
   if(sum(!output_columns %in% db_fields) != 0) etl_job_stop("some output columns do not match data base fields")
-
+  
   for(i in db_fields) {
     if(!i %in% output_columns) {
       df[[i]] <- NA
     }
   }
-
+  
   df <- df[, db_fields]
-
-  sqlSave(channel = connection, dat = df, tablename = table,
-          append = append, rownames = FALSE)
-
+  
+  RODBC::sqlSave(channel = connection, dat = df, tablename = table,
+                 append = append, rownames = FALSE)
+  
 }

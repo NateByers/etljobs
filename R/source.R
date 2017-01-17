@@ -1,6 +1,6 @@
 source_csv <- function(source_name, location, fields, types){
   # location <- source$location; fields <- source$fields$field; types <- source$fields$field_type
-  columns <-strsplit(readLines(location, n = 1), ",")[[1]]
+  columns <- strsplit(readLines(location, n = 1), ",")[[1]]
   fields[!grepl("\\S", fields)] <- NA
 
   # if there are no fields specified, just include all columns
@@ -28,7 +28,7 @@ source_csv <- function(source_name, location, fields, types){
   }
 
   df <- read.csv(location, colClasses = column_types, stringsAsFactors = FALSE) %>%
-    select_(.dots = fields)
+    dplyr::select_(.dots = fields)
 
   names(df) <- paste(source_name, names(df), sep = ".")
 
